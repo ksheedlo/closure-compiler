@@ -379,6 +379,21 @@ public class CommandLineRunner extends
         + "annotated with @ngInject")
     private boolean angularPass = false;
 
+    @Option(name = "--minerr_pass",
+        handler = BooleanOptionHandler.class,
+        usage = "Strip error messages from calls to minErr instances")
+    private boolean minerrPass = false;
+
+    @Option(name = "--minerr_errors",
+        handler = StringOptionHandler.class,
+        usage = "Output stripped error messages to a file")
+    private String minerrErrors = "errors.json";
+
+    @Option(name = "--minerr_definition",
+        handler = StringOptionHandler.class,
+        usage = "Load production minErr definition from a file")
+    private String minerrDefinition = null;
+
     @Option(name = "--output_manifest",
         usage = "Prints out a list of all the files in the compilation. "
         + "If --manage_closure_dependencies is on, this will not include "
@@ -781,7 +796,9 @@ public class CommandLineRunner extends
           .setCommonJSModulePathPrefix(flags.commonJsPathPrefix)
           .setTransformAMDToCJSModules(flags.transformAmdModules)
           .setWarningsWhitelistFile(flags.warningsWhitelistFile)
-          .setAngularPass(flags.angularPass);
+          .setAngularPass(flags.angularPass)
+          .setMinerrPass(flags.minerrPass)
+          .setMinerrErrors(flags.minerrErrors);
     }
   }
 
@@ -823,6 +840,10 @@ public class CommandLineRunner extends
         flags.processJqueryPrimitives;
 
     options.angularPass = flags.angularPass;
+
+    options.minerrPass = flags.minerrPass;
+
+    options.minerrErrors = flags.minerrErrors;
 
     if (!flags.translationsFile.isEmpty()) {
       try {

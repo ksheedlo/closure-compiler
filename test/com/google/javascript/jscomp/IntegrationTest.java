@@ -24,6 +24,14 @@ import com.google.javascript.jscomp.CompilerOptions.LanguageMode;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.rhino.Token;
 
+import org.json.JSONObject;
+import org.json.JSONException;
+
+import java.util.Scanner;
+
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Tests for {@link PassFactory}.
  *
@@ -345,6 +353,46 @@ public class IntegrationTest extends IntegrationTestCase {
         "function f() {} " +
         "function g(a) {} g['$inject']=['a'];" +
         "var b = function f(a, b, c) {}; b['$inject']=['a', 'b', 'c']");
+  }
+
+  public void testMinerrPassOff() {
+    testSame(createCompilerOptions(),
+      "testMinErr('test', 'This is a {0}', test);");    
+  }
+
+  public void testMinerrPassOn() {
+    CompilerOptions options = createCompilerOptions();
+    options.minerrPass = true;
+    options.minerrErrors = "errors.json";
+    test(options,
+      "testMinErr('one', 'This is a {0}', test);\n"
+      +"testMinErr('two', 'That is a {0}', foo);\n"
+      +"ngMinErr('one', 'We are {0}', 'superheroic');",
+
+      "testMinErr('one', test);\n"
+      +"testMinErr('two', foo);\n"
+      +"ngMinErr('one', 'superheroic');");
+
+    String result, expected;
+    try {
+      File errors = new File("errors.json");
+      Scanner errorScanner = new Scanner(errors);
+      JSONObject json = new JSONObject(errorScanner.nextLine());
+      result = json.toString();
+      errorScanner.close();
+      errors.delete();
+      JSONObject expectJson = new JSONObject(
+        "{'test':{'one':'This is a {0}','two':'That is a {0}'},'ng':{'one':'We are {0}'}}");
+      expected = expectJson.toString();
+    } catch (IOException e) {
+      // This will cause the assertion to fail
+      result = "";
+      expected = "fail";
+    } catch (JSONException e) {
+      result = "";
+      expected = "fail";
+    }
+    assertEquals(expected, result);
   }
 
   public void testExportTestFunctionsOff() {

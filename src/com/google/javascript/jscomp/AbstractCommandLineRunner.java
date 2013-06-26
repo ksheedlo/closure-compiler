@@ -354,6 +354,9 @@ abstract class AbstractCommandLineRunner<A extends Compiler,
     options.processCommonJSModules = config.processCommonJSModules;
     options.commonJSModulePathPrefix = config.commonJSModulePathPrefix;
     options.angularPass = config.angularPass;
+    options.minerrPass = config.minerrPass;
+    options.minerrErrors = config.minerrErrors;
+    options.minerrDefinition = config.minerrDefinition;
   }
 
   protected final A getCompiler() {
@@ -1999,6 +2002,36 @@ abstract class AbstractCommandLineRunner<A extends Compiler,
      */
     CommandLineConfig setAngularPass(boolean angularPass) {
       this.angularPass = angularPass;
+      return this;
+    }
+
+    private boolean minerrPass = false;
+
+    /**
+     * Sets whether to strip minErr error messages.
+     */
+    CommandLineConfig setMinerrPass(boolean minerrPass) {
+      this.minerrPass = minerrPass;
+      return this;
+    }
+
+    private String minerrErrors = null;
+
+    /**
+     * Sets the minerr error output file.
+     */
+    CommandLineConfig setMinerrErrors(String minerrErrors) {
+      this.minerrErrors = minerrErrors;
+      return this;
+    }
+
+    private String minerrDefinition = null;
+
+    /**
+     * Sets the minerr definition file.
+     */
+    CommandLineConfig setMinerrDefinition(String minerrDefinition) {
+      this.minerrDefinition = minerrDefinition;
       return this;
     }
   }

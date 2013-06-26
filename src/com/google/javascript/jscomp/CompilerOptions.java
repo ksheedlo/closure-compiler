@@ -622,6 +622,23 @@ public class CompilerOptions implements Serializable, Cloneable {
   /** Processes AngularJS-specific annotations */
   boolean angularPass;
 
+  /** Strips errors from calls to minErr instances. */
+  boolean minerrPass;
+
+  /** If minerrPass, stripped errors go into a file with this name. */
+  String minerrErrors;
+
+  /** In a minerrPass, a new minErr definition can be optionally loaded. 
+   * The file should contain a single function definition:
+   * 
+   *     function minErr(module) {
+   *       // Make a function that creates minErr errors.
+   *       ...
+   *       return instanceMinErr;
+   *     }
+   */
+  String minerrDefinition;
+
   /** Remove goog.abstractMethod assignments. */
   boolean removeAbstractMethods;
 
@@ -983,6 +1000,8 @@ public class CompilerOptions implements Serializable, Cloneable {
     closurePass = false;
     jqueryPass = false;
     angularPass = false;
+    minerrPass = false;
+    minerrDefinition = null;
     removeAbstractMethods = true;
     removeClosureAsserts = false;
     stripTypes = Collections.emptySet();
@@ -1024,6 +1043,7 @@ public class CompilerOptions implements Serializable, Cloneable {
     externExports = false;
     nameReferenceReportPath = null;
     nameReferenceGraphPath = null;
+    minerrErrors = "errors.json";
 
     // Debugging
     aliasHandler = NULL_ALIAS_TRANSFORMATION_HANDLER;
@@ -1432,6 +1452,18 @@ public class CompilerOptions implements Serializable, Cloneable {
 
   public void setAngularPass(boolean angularPass) {
     this.angularPass = angularPass;
+  }
+
+  public void setMinerrPass(boolean minerrPass) {
+    this.minerrPass = minerrPass;
+  }
+
+  public void setMinerrDefinition(String minerrDefinition) {
+    this.minerrDefinition = minerrDefinition;
+  }
+
+  public void setMinerrErrors(String minerrErrors) {
+    this.minerrErrors = minerrErrors;
   }
 
   public void setCodingConvention(CodingConvention codingConvention) {

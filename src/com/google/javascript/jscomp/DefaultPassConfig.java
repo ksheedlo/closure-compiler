@@ -34,6 +34,7 @@ import com.google.javascript.rhino.Node;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -217,6 +218,10 @@ public class DefaultPassConfig extends PassConfig {
 
     if (options.angularPass) {
       checks.add(angularPass);
+    }
+
+    if (options.minerrPass) {
+      checks.add(minerrPass);
     }
 
     checks.add(checkSideEffects);
@@ -980,6 +985,30 @@ public class DefaultPassConfig extends PassConfig {
     @Override
     protected CompilerPass create(AbstractCompiler compiler) {
       return new AngularPass(compiler);
+    }
+  };
+
+  /** Strips error messages from calls to minErr instances. */
+  final PassFactory minerrPass = 
+      new PassFactory("minerrPass", true) {
+    @Override
+    protected CompilerPass create(AbstractCompiler compiler) {
+      String filename = options.minerrErrors;
+      String minerrDef = options.minerrDefinition;
+      try {
+        if (minerrDef == null) {
+          return new MinerrPass(compiler, new PrintStream(filename));
+        } else {
+          SourceFile productionSource = SourceFile.fromFile(minerrDef);
+          JsAst productionAST = new JsAst(productionSource);
+          Node subAST = productionAST.getAstRoot(compiler).getFirstChild().detachFromParent();
+          return new MinerrPass(compiler, new PrintStream(filename), subAST);
+        }
+      } catch (IOException e) {
+        System.err.println(e);
+        System.exit(1);
+      }
+      return null;
     }
   };
 
