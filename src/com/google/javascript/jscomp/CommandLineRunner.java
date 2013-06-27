@@ -798,7 +798,8 @@ public class CommandLineRunner extends
           .setWarningsWhitelistFile(flags.warningsWhitelistFile)
           .setAngularPass(flags.angularPass)
           .setMinerrPass(flags.minerrPass)
-          .setMinerrErrors(flags.minerrErrors);
+          .setMinerrErrors(flags.minerrErrors)
+          .setMinerrDefinition(flags.minerrDefinition);
     }
   }
 
@@ -844,6 +845,8 @@ public class CommandLineRunner extends
     options.minerrPass = flags.minerrPass;
 
     options.minerrErrors = flags.minerrErrors;
+
+    options.minerrDefinition = flags.minerrDefinition;
 
     if (!flags.translationsFile.isEmpty()) {
       try {
