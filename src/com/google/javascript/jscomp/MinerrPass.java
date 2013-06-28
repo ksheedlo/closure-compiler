@@ -38,7 +38,31 @@ class MinerrPass extends AbstractPostOrderCallback implements CompilerPass {
   private List<Node> minerrInstances;
   private PrintStream errorConfigOutput;
   private Node subAST;
-  private Node minerrDefinition;
+  private Node minerrDefNode;
+  private String minerrUrl;
+  private String minerrDefSource;
+
+  static final String MINERR_SOURCE = 
+    "function minErr(module) {\n" +
+    "  var stringify = function (arg) {\n" +
+    "    if (typeof arg == 'function') {\n" +
+    "      return arg.toString().replace(/ \\{[\\s\\S]*$/, '');\n" +
+    "    } else if (typeof arg == 'undefined') {\n" +
+    "      return 'undefined';\n" +
+    "    } else if (!(typeof arg == 'string')) {\n" +
+    "      return JSON.stringify(arg);\n" +
+    "    }\n" +
+    "    return arg; };\n" +
+    "  return function () {\n" +
+    "    var code = arguments[0],\n" +
+    "      prefix = '[' + (module ? module + ':' : '') + code + '] ',\n" +
+    "      message,\n" +
+    "      i = 1;\n" +
+    "    message = prefix + '\"MINERR_URL\"' + (module ? module + '/' : '') + code;\n" +
+    "    for(; i < arguments.length; i++) {\n" +
+    "      message = message + (i == 1 ? '?' : '&') + 'p' + (i-1) + '=' + stringify(arguments[i]);\n" +
+    "    }\n" +
+    "    return new Error(message); }; }";
 
   static final DiagnosticType THROW_IS_NOT_MINERR_ERROR_WARNING = 
       DiagnosticType.warning("JSC_THROW_IS_NOT_MINERR_ERROR_WARNING",
@@ -52,17 +76,27 @@ class MinerrPass extends AbstractPostOrderCallback implements CompilerPass {
       DiagnosticType.warning("JSC_MULTIPLE_MINERR_DEFINITION_WARNING",
           "Found definitions for the function 'minErr' in multiple locations.");
 
-  public MinerrPass(AbstractCompiler compiler, PrintStream errorConfigOutput, Node subAST) {
+  public MinerrPass(AbstractCompiler compiler, PrintStream errorConfigOutput, String minerrDef) {
     this.compiler = compiler;
     namespaces = new HashMap<String, Map<String, String>>();
     globalNamespace = new HashMap<String, String>();
     minerrInstances = new ArrayList<Node>();
     this.errorConfigOutput = errorConfigOutput;
-    this.subAST = subAST;
+    minerrDefSource = minerrDef;
   }
 
   public MinerrPass(AbstractCompiler compiler, PrintStream errorConfigOutput) {
     this(compiler, errorConfigOutput, null);
+  }
+
+  static String substituteInSource(String url) {
+    return MINERR_SOURCE.replace("\"MINERR_URL\"", url);
+  }
+
+  private Node createSubstituteMinerrDefinition() {
+    SourceFile source = SourceFile.fromCode("MINERR_ASSET", minerrDefSource);
+    JsAst ast = new JsAst(source);
+    return ast.getAstRoot(compiler).getFirstChild().detachFromParent();
   }
 
   private boolean isMinerrCall(Node ast) {
@@ -187,8 +221,8 @@ class MinerrPass extends AbstractPostOrderCallback implements CompilerPass {
       codeChanged = true;
     }
 
-    if (minerrDefinition != null && subAST != null) {
-      minerrDefinition.getParent().replaceChild(minerrDefinition, subAST);
+    if (minerrDefNode != null && minerrDefSource != null) {
+      minerrDefNode.getParent().replaceChild(minerrDefNode, createSubstituteMinerrDefinition());
       codeChanged = true;
     }
 
@@ -214,8 +248,8 @@ class MinerrPass extends AbstractPostOrderCallback implements CompilerPass {
       minerrInstances.add(n);
     }
     if (isMinerrDefinition(n)) {
-      if (minerrDefinition == null) {
-        minerrDefinition = n;
+      if (minerrDefNode == null) {
+        minerrDefNode = n;
       } else {
         compiler.report(t.makeError(n, MULTIPLE_MINERR_DEFINITION_WARNING));
       }

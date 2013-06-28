@@ -29,27 +29,24 @@ import java.io.PrintStream;
 public class MinerrPassTest extends CompilerTestCase {
 
   private ByteArrayOutputStream dummyOutput;
-  private JsAst testSubAST;
+  private String subCode;
 
   public MinerrPassTest() {
     super();
     enableLineNumberCheck(false);
     dummyOutput = new ByteArrayOutputStream();
+    subCode = null;
   }
 
   public void setUp() throws Exception {
     super.setUp();
     dummyOutput.reset();
+    subCode = null;
   }
 
   @Override
   protected CompilerPass getProcessor(Compiler compiler) {
-    Node functionDef = null;
-    if (testSubAST != null) {
-      Node root = testSubAST.getAstRoot(compiler);
-      functionDef = root.getFirstChild().detachFromParent();
-    }
-    return new MinerrPass(compiler, new PrintStream(dummyOutput), functionDef);
+    return new MinerrPass(compiler, new PrintStream(dummyOutput), subCode);
   }
 
   @Override
@@ -149,10 +146,9 @@ public class MinerrPassTest extends CompilerTestCase {
   }
 
   public void testMinerrPassShouldSubstituteTheMinerrDefinition() {
-    SourceFile dummyProductionSource = SourceFile.fromCode("minErr.js",
-      "function minErr(module) {\n"
-      +"return module + 42; }");
-    testSubAST = new JsAst(dummyProductionSource);
+    subCode = 
+      "function minErr(module) {\n" +
+      "  return module + 42; }";
     test("function minErr(module) {\n"
         +"  console.log('This should be ripped out.'); }",
         "function minErr(module) {\n"
@@ -160,10 +156,9 @@ public class MinerrPassTest extends CompilerTestCase {
   }
 
   public void testMinerrPassSubstitutionPreservesRegularExpressions() {
-    SourceFile dummyProductionSource = SourceFile.fromCode("minErr.js",
-      "function minErr(module) {\n"
-      +"return new RegExp(module + '\\\\d+'); }");
-    testSubAST = new JsAst(dummyProductionSource);
+    subCode = 
+      "function minErr(module) {\n" +
+      "return new RegExp(module + '\\\\d+'); }";
     test("function minErr(module) {\n"
         +"  console.log('This should be ripped out.'); }",
         "function minErr(module) {\n"

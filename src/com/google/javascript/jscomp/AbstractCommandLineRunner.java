@@ -356,7 +356,7 @@ abstract class AbstractCommandLineRunner<A extends Compiler,
     options.angularPass = config.angularPass;
     options.minerrPass = config.minerrPass;
     options.minerrErrors = config.minerrErrors;
-    options.minerrDefinition = config.minerrDefinition;
+    options.minerrUrl = config.minerrUrl;
   }
 
   protected final A getCompiler() {
@@ -2025,13 +2025,13 @@ abstract class AbstractCommandLineRunner<A extends Compiler,
       return this;
     }
 
-    private String minerrDefinition = null;
+    private String minerrUrl = null;
 
     /**
-     * Sets the minerr definition file.
+     * Sets the URL to substitute into minerr.
      */
-    CommandLineConfig setMinerrDefinition(String minerrDefinition) {
-      this.minerrDefinition = minerrDefinition;
+    CommandLineConfig setMinerrUrl(String minerrUrl) {
+      this.minerrUrl = minerrUrl;
       return this;
     }
   }

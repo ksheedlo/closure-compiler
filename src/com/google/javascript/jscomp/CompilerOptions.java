@@ -628,16 +628,11 @@ public class CompilerOptions implements Serializable, Cloneable {
   /** If minerrPass, stripped errors go into a file with this name. */
   String minerrErrors;
 
-  /** In a minerrPass, a new minErr definition can be optionally loaded. 
-   * The file should contain a single function definition:
+  /** If minerrPass, substitute this url prefix in the minerr implementation.
    * 
-   *     function minErr(module) {
-   *       // Make a function that creates minErr errors.
-   *       ...
-   *       return instanceMinErr;
-   *     }
+   * No substitution occurs if minerrUrl is null.
    */
-  String minerrDefinition;
+  String minerrUrl;
 
   /** Remove goog.abstractMethod assignments. */
   boolean removeAbstractMethods;
@@ -1001,7 +996,7 @@ public class CompilerOptions implements Serializable, Cloneable {
     jqueryPass = false;
     angularPass = false;
     minerrPass = false;
-    minerrDefinition = null;
+    minerrUrl = null;
     removeAbstractMethods = true;
     removeClosureAsserts = false;
     stripTypes = Collections.emptySet();
@@ -1458,8 +1453,8 @@ public class CompilerOptions implements Serializable, Cloneable {
     this.minerrPass = minerrPass;
   }
 
-  public void setMinerrDefinition(String minerrDefinition) {
-    this.minerrDefinition = minerrDefinition;
+  public void setMinerrUrl(String minerrUrl) {
+    this.minerrUrl = minerrUrl;
   }
 
   public void setMinerrErrors(String minerrErrors) {

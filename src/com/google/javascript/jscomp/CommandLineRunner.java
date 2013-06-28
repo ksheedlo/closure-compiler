@@ -389,10 +389,10 @@ public class CommandLineRunner extends
         usage = "Output stripped error messages to a file")
     private String minerrErrors = "errors.json";
 
-    @Option(name = "--minerr_definition",
+    @Option(name = "--minerr_url",
         handler = StringOptionHandler.class,
-        usage = "Load production minErr definition from a file")
-    private String minerrDefinition = null;
+        usage = "MinErr error messages will log links with this url prefix")
+    private String minerrUrl = null;
 
     @Option(name = "--output_manifest",
         usage = "Prints out a list of all the files in the compilation. "
@@ -799,7 +799,7 @@ public class CommandLineRunner extends
           .setAngularPass(flags.angularPass)
           .setMinerrPass(flags.minerrPass)
           .setMinerrErrors(flags.minerrErrors)
-          .setMinerrDefinition(flags.minerrDefinition);
+          .setMinerrUrl(flags.minerrUrl);
     }
   }
 
@@ -846,7 +846,7 @@ public class CommandLineRunner extends
 
     options.minerrErrors = flags.minerrErrors;
 
-    options.minerrDefinition = flags.minerrDefinition;
+    options.minerrUrl = flags.minerrUrl;
 
     if (!flags.translationsFile.isEmpty()) {
       try {

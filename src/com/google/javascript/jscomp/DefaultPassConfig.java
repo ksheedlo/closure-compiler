@@ -994,15 +994,13 @@ public class DefaultPassConfig extends PassConfig {
     @Override
     protected CompilerPass create(AbstractCompiler compiler) {
       String filename = options.minerrErrors;
-      String minerrDef = options.minerrDefinition;
+      String minerrUrl = options.minerrUrl;
       try {
-        if (minerrDef == null) {
+        if (minerrUrl == null) {
           return new MinerrPass(compiler, new PrintStream(filename));
         } else {
-          SourceFile productionSource = SourceFile.fromFile(minerrDef);
-          JsAst productionAST = new JsAst(productionSource);
-          Node subAST = productionAST.getAstRoot(compiler).getFirstChild().detachFromParent();
-          return new MinerrPass(compiler, new PrintStream(filename), subAST);
+          String minerrSource = MinerrPass.substituteInSource(minerrUrl);
+          return new MinerrPass(compiler, new PrintStream(filename), minerrSource);
         }
       } catch (IOException e) {
         System.err.println(e);
